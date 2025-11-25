@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "dgSpecHash": "WKPBOoWEQC8=",
+  "success": false,
+  "projectFilePath": "D:\\Works\\Formations\\Templates\\ias\\mcps\\workshops\\workshop-mcp\\server\\examples\\ProtectedMcpServer\\ProtectedMcpServer.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\evan\\.nuget\\packages\\microsoft.netcore.app.ref\\9.0.10\\microsoft.netcore.app.ref.9.0.10.nupkg.sha512",
+    "C:\\Users\\evan\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\9.0.10\\microsoft.windowsdesktop.app.ref.9.0.10.nupkg.sha512",
+    "C:\\Users\\evan\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\9.0.10\\microsoft.aspnetcore.app.ref.9.0.10.nupkg.sha512",
+    "C:\\Users\\evan\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\9.0.10\\microsoft.netcore.app.host.win-x64.9.0.10.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1015",
+      "level": "Error",
+      "message": "The following PackageReference item(s) do not have a version specified: Microsoft.AspNetCore.Authentication.JwtBearer",
+      "projectPath": "D:\\Works\\Formations\\Templates\\ias\\mcps\\workshops\\workshop-mcp\\server\\examples\\ProtectedMcpServer\\ProtectedMcpServer.csproj",
+      "filePath": "D:\\Works\\Formations\\Templates\\ias\\mcps\\workshops\\workshop-mcp\\server\\examples\\ProtectedMcpServer\\ProtectedMcpServer.csproj",
+      "targetGraphs": []
+    }
+  ]
+}

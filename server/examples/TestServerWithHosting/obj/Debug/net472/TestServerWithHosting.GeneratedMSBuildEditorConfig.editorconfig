@@ -1,0 +1,8 @@
+is_global = true
+build_property.RootNamespace = TestServerWithHosting
+build_property.ProjectDir = D:\Works\Formations\Templates\ias\mcps\workshops\workshop-mcp\server\examples\TestServerWithHosting\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.CsWinRTUseWindowsUIXamlProjections = false
+build_property.EffectiveAnalysisLevelStyle = 
+build_property.EnableCodeStyleSeverity = 
