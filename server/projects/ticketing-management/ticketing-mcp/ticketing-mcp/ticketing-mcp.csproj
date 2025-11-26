@@ -11,8 +11,8 @@
 	<PropertyGroup>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>ticketing-mcp</ToolCommandName>
-		<PackageId>VotreEntreprise.TicketingMcpServer</PackageId>
-		<Version>1.0.0</Version>
+		<PackageId>DevToBeCurious.TicketingMcpServer</PackageId>
+		<Version>1.1.1</Version>
 		<Authors>Evan le chat curieux</Authors>
 		<Company>DevToBeCurious</Company>
 		<Description>Serveur MCP pour la gestion des tickets</Description>

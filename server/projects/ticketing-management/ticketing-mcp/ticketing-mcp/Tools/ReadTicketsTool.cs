@@ -17,7 +17,7 @@ namespace ticketing_mcp.Tools
         public static Task<string> GetTickets()
         {
 
-            return Task.FromResult(string.Join("\n--\n", TicketDatabase.GetAllTickets()));
+            return Task.FromResult(string.Join("\n--\n", TicketDatabase.GetAllTickets().Select(item => $"* title : {item.Title} \n * description : {item.Description} \n * status : {item.Status}")));
         }
         #endregion
     }
