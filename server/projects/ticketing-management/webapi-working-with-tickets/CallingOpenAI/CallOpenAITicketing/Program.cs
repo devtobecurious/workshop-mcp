@@ -1,8 +1,15 @@
 using Microsoft.Extensions.AI;
 
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
 
 using OpenAI;
+using OpenAI.Assistants;
+using OpenAI.Chat;
+
+using System.Runtime.CompilerServices;
+
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,8 +95,63 @@ app.MapPost("/api/chat", async (IChatClient chatClient, McpClient mcpClient, Cha
     return Results.Ok(new { response = responseText });
 });
 
+app.MapPost("/api/chat/stream", async (IChatClient chatClient, McpClient mcpClient, ChatRequest request, CancellationToken cancellationToken) =>
+{
+    var streaming = new ChatStreaming().GetAll(chatClient, mcpClient, request, cancellationToken);
+
+    return TypedResults.ServerSentEvents(streaming, eventType: "ticket");
+});
+
+
+
 app.Run();
 
+public class ChatStreaming
+{
+    public async IAsyncEnumerable<ChatResponseUpdate> GetAll(IChatClient chatClient, McpClient mcpClient, ChatRequest request, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var tools = await mcpClient.ListToolsAsync().ConfigureAwait(false);
+
+        var messages = request.ToMessages();
+
+        var streamingUpdates = new List<ChatResponseUpdate>();
+        await foreach (var update in chatClient.GetStreamingResponseAsync(messages, new() { Tools = [.. tools.Cast<AITool>()] }))
+        {
+            streamingUpdates.Add(update);
+            yield return update;
+        }
+
+        var assistantContents = streamingUpdates
+            .SelectMany(u => u.Contents)
+            .ToList();
+
+        var functionCalls = assistantContents
+            .OfType<FunctionCallContent>()
+            .ToList();
+
+        if (functionCalls.Count != 0)
+        {
+            messages.Add(new ChatMessage(ChatRole.Assistant, assistantContents));
+
+            foreach (var functionCall in functionCalls)
+            {
+                var toolResult = await mcpClient.CallToolAsync(functionCall.Name, (IReadOnlyDictionary<string, object?>?)functionCall.Arguments).ConfigureAwait(false);
+                messages.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(functionCall.CallId, toolResult)]));
+            }
+
+            var finalUpdates = new List<ChatResponseUpdate>();
+            await foreach (var update in chatClient.GetStreamingResponseAsync(messages, new() { Tools = [.. tools.Cast<AITool>()] }))
+            {
+                if (update.Text != null)
+                {
+                    finalUpdates.Add(update);
+                    yield return update;
+                }
+            }
+            streamingUpdates.AddRange(finalUpdates);
+        }
+    }
+}
 
 public record ChatRequest
 {

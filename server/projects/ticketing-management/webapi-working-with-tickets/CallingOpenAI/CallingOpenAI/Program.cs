@@ -16,6 +16,7 @@ string? key = config["OpenAIKey"];
 var openAiClient = new OpenAIClient(key).GetChatClient(model);
 using IChatClient chatClient = openAiClient.AsIChatClient();
 
+
 await using var mcpClient = await McpClient.CreateAsync(new StdioClientTransport(new()
 {
     Name = "Ticketing",
