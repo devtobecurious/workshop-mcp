@@ -19,7 +19,7 @@ using IChatClient chatClient = openAiClient.AsIChatClient();
 
 await using var mcpClient = await McpClient.CreateAsync(new HttpClientTransport(new()
 {
-    Endpoint = new Uri("http://localhost:5287"),
+    Endpoint = new Uri("http://localhost:5237"),
     Name = "Ticketing",
 }));
 
