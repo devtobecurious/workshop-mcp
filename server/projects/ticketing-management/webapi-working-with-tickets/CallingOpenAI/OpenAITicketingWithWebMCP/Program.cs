@@ -4,8 +4,11 @@ using Microsoft.Extensions.Logging;
 
 using ModelContextProtocol;
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
 
 using OpenAI;
+
+using System.Globalization;
 
 IConfigurationRoot config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
@@ -23,17 +26,77 @@ await using var mcpClient = await McpClient.CreateAsync(new HttpClientTransport(
     Name = "Ticketing",
 }));
 
+// List available resources
+var resources = await mcpClient.ListResourcesAsync().ConfigureAwait(false);
+foreach (var item in resources)
+{
+    Console.WriteLine("Resource: " + item.Name);
+    var result = await item.ReadAsync().ConfigureAwait(false);
+}
+
 var tools = await mcpClient.ListToolsAsync().ConfigureAwait(false);
 
 while (true)
 {
     Console.WriteLine("\nPrompt ?");
-    string prompt = Console.ReadLine();
+    var prompts = await mcpClient.ListPromptsAsync().ConfigureAwait(false);
+
+    int i = 0;
+    foreach (var existingPrompt in prompts)
+    {
+        Console.WriteLine($"{i} - {existingPrompt.Name}");
+        i++;
+    }
+    Console.WriteLine($"{i} - Nouveau");
+    Console.WriteLine("Lequel ?");
+    string prompt = string.Empty;
+    string? promptChoice = Console.ReadLine();
+
+    var reglementation = await resources.First().ReadAsync().ConfigureAwait(false);
+
     var messages = new List<ChatMessage>
     {
         new ChatMessage(ChatRole.System, "You are a helpful assistant that summarizes support tickets."),
-        new ChatMessage(ChatRole.User, prompt)
+        new ChatMessage(ChatRole.User, reglementation.Contents.OfType<TextResourceContents>().First().Text)
     };
+
+    if (int.Parse(promptChoice) < prompts.Count)
+    {
+        var selectedPrompt = prompts[int.Parse(promptChoice!, CultureInfo.InvariantCulture)];
+        var promptArgs = new Dictionary<string, object?>();
+        if (selectedPrompt.ProtocolPrompt.Arguments?.Any() == true)
+        {
+            Console.WriteLine($"\n=== Arguments pour '{selectedPrompt.Name}' ===");
+            foreach (var arg in selectedPrompt.ProtocolPrompt.Arguments)
+            {
+                Console.Write($"{arg.Name}{(arg.Required.GetValueOrDefault() ? "*" : "")} ({arg.Description}): ");
+                string value = Console.ReadLine();
+
+                if (arg.Required.GetValueOrDefault() && string.IsNullOrWhiteSpace(value))
+                {
+                    Console.WriteLine($"L'argument '{arg.Name}' est requis!");
+                }
+
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    promptArgs[arg.Name] = value;
+                }
+            }
+        }
+
+        var promptResult = await mcpClient.GetPromptAsync(
+            selectedPrompt.Name,
+            (IReadOnlyDictionary<string, object?>?)promptArgs
+        ).ConfigureAwait(false);
+
+        messages = promptResult.Messages.Select(m => m.ToChatMessage()).ToList();
+    }
+    else
+    {
+        Console.WriteLine("Le prompt ? ");
+        prompt = Console.ReadLine() ?? string.Empty;
+        messages.Add(new ChatMessage(ChatRole.User, prompt));
+    }
 
     var streamingUpdates = new List<ChatResponseUpdate>();
     await foreach (var update in chatClient.GetStreamingResponseAsync(messages, new() { Tools = [.. tools.Cast<AITool>()] }))

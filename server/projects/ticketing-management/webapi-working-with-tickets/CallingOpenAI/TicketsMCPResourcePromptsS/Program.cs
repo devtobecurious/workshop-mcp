@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 
 using TicketsMCPResourcePromptsS.Prompts;
+using TicketsMCPResourcePromptsS.Resources;
 using TicketsMCPResourcePromptsS.Tools;
 
 
@@ -10,7 +11,8 @@ builder.Services.AddMcpServer()
                 .WithHttpTransport()
                 .WithTools<ReadTicketsTool>()
                 .WithTools<AnalyzePriorityTool>()
-                .WithPrompts<PromptsContainer>();
+                .WithPrompts<PromptsContainer>()
+                .WithResources<TicketingResource>();
 
 var app = builder.Build();
 

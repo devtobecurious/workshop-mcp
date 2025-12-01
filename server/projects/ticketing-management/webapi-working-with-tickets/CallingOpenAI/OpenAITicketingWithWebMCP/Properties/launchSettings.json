@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OpenAITicketingWithWebMCP": {
+      "commandName": "Project",
+      "commandLineArgs": "documentationpath=D:\\Works\\Formations\\Templates\\ias\\mcps\\workshops\\workshop-mcp\\server\\projects\\ticketing-management\\webapi-working-with-tickets\\CallingOpenAI\\OpenAITicketingWithWebMCP"
+    }
+  }
+}
